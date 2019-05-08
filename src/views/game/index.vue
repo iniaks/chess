@@ -20,6 +20,8 @@
             阵营: <input v-model="test_camp"/>
             <br>
             <button @click='createKing'>生成王</button>
+            <br>
+            <button @click='createPawn'>生成卒</button>
 
             <p>选择棋子：{{selected_unit ? selected_unit.unit.name : '未选择'}}</p>
         
@@ -52,7 +54,11 @@
         checkMovable (scopes, camp) {
             let movable = false
             const self = this
-            scopes.forEach(scope => {
+            let _scopes = scopes
+            _scopes.forEach((scope, index) => {
+                if (scope[0] < 1 || scope[0] > 18 || scope[1] < 1 || scope[1] > 18) _scopes.splice(index, 1)
+            })
+            _scopes.forEach(scope => {
                 if (scope[0] == self.x && scope[1] == self.y && (!self.unit || self.unit.camp != camp)) movable = true
             })
             this.movable = movable
@@ -88,20 +94,32 @@
         },
         methods: {
             createKing () {
-                let king = new Chess('king', 'king-chess-piece-shape.png', this.test_camp, (x, y) => {
-                    let scopes = [
+                let king = new Chess('king', 'king.png', this.test_camp, (x, y) => {
+                    return [
                         [x, y],
                         [x - 1, y],
                         [x + 1, y],
                         [x, y - 1],
                         [x, y + 1]
                     ]
-                    scopes.forEach((scope, index) => {
-                        if (scope[0] < 1 || scope[0] > 18 || scope[1] < 1 || scope[1] > 18) scopes.splice(index, 1)
-                    })
-                    return scopes
                 })
                 this.chessboard[this.test_x - 1][this.test_y - 1].putDown(king)
+            },
+            createPawn () {
+                let pawn = new Chess('pawn', 'sword.png', this.test_camp, (x, y) => {
+                    return [
+                        [x, y],
+                        [x - 1, y],
+                        [x - 2, y],
+                        [x + 1, y],
+                        [x + 2, y],
+                        [x, y - 1],
+                        [x, y - 2],
+                        [x, y + 1],
+                        [x, y + 2]
+                    ]
+                })
+                this.chessboard[this.test_x - 1][this.test_y - 1].putDown(pawn)
             },
             choose (cell) {
                 // const self = this
@@ -187,7 +205,7 @@
             box-shadow: 0 0 1px rgba(0, 0, 0, 0.15);
             background-position: center;
             background-repeat: no-repeat;
-            background-size: cover;
+            background-size: 60%;
         }
         .chess-board__row:nth-child(odd) {
             .chess-board__cell:nth-child(odd) {
